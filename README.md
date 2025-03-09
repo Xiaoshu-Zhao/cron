@@ -50,3 +50,104 @@ pnpm dev
 ```
 
 Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=examples-repo) ([Documentation](https://nextjs.org/docs/deployment)).
+
+# Job Information Aggregator
+
+This application aggregates job listings from major tech companies like Google, Amazon, and Aliyun. The data is scraped using Firecrawl Node SDK and stored using Vercel KV.
+
+## Features
+
+- Scrapes job listings from Google, Amazon, and Aliyun
+- Displays job statistics by company
+- Shows recent job listings with details
+- Allows manual triggering of job scraping
+
+## Tech Stack
+
+- **Frontend**: Next.js, React, Tailwind CSS
+- **Backend**: Next.js API Routes
+- **Data Scraping**: Firecrawl Node SDK
+- **Data Storage**: Vercel KV (Redis)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 14+ and npm/pnpm
+- A Firecrawl API key (get one from [firecrawl.dev](https://firecrawl.dev))
+- Vercel KV (Redis) instance
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd job-aggregator
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+pnpm install
+```
+
+3. Set up environment variables:
+
+Copy the `.env.example` file to `.env.local` and fill in the required values:
+
+```bash
+cp .env.example .env.local
+```
+
+Edit `.env.local` and add your Firecrawl API key and Vercel KV credentials.
+
+### Running the Application
+
+1. Start the development server:
+
+```bash
+npm run dev
+# or
+pnpm dev
+```
+
+2. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+3. Click the "Scrape Jobs Now" button to trigger the job scraping process.
+
+## API Routes
+
+- `GET /api/data/1d` - Get job listings and company statistics
+- `GET /api/jobs/[company]` - Get jobs for a specific company
+- `POST /api/scrape` - Trigger job scraping (all companies or a specific company)
+
+## Project Structure
+
+```
+├── components/         # React components
+│   ├── CompanyStats.tsx  # Company statistics component
+│   └── JobCard.tsx       # Job listing card component
+├── lib/                # Library code
+│   ├── db.ts           # Database utilities
+│   ├── scraper.ts      # Main scraper controller
+│   ├── types.ts        # TypeScript type definitions
+│   └── scrapers/       # Individual scrapers
+│       ├── google.ts   # Google jobs scraper
+│       ├── amazon.ts   # Amazon jobs scraper
+│       └── aliyun.ts   # Aliyun jobs scraper
+├── pages/              # Next.js pages
+│   ├── api/            # API routes
+│   │   ├── cron/       # Cron job API routes
+│   │   ├── data/       # Data API routes
+│   │   ├── jobs/       # Jobs API routes
+│   │   └── scrape.ts   # Scrape API route
+│   └── index.tsx       # Main page
+└── public/             # Static assets
+```
+
+## License
+
+MIT
