@@ -4,7 +4,7 @@ import useSWR from 'swr'
 import JobCard from '@/components/JobCard'
 import CompanyStats from '@/components/CompanyStats'
 import { JobListing, CompanyStats as CompanyStatsType } from '@/lib/types'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface JobData {
   fetchedAt: number;
@@ -15,7 +15,6 @@ interface JobData {
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
-  const [autoScrapeDone, setAutoScrapeDone] = useState(false);
   const [scrapeError, setScrapeError] = useState<string | null>(null);
   const [nextScrapeTime, setNextScrapeTime] = useState<number | null>(null);
   
@@ -23,61 +22,6 @@ export default function Home() {
   const { data, error, mutate } = useSWR<JobData>('/api/data/1d', (url: string) =>
     fetch(url).then((res) => res.json())
   );
-  
-  // 自动执行爬虫任务（仅在页面首次加载时）
-  useEffect(() => {
-    const autoScrape = async () => {
-      if (autoScrapeDone) return;
-      
-      setIsLoading(true);
-      setScrapeError(null);
-      
-      try {
-        console.log('Auto-scraping jobs on page load...');
-        const response = await fetch('/api/scrape', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        const responseData = await response.json();
-        
-        if (!response.ok) {
-          // 处理限流情况
-          if (response.status === 429) {
-            console.log('Rate limited, using cached data');
-            setNextScrapeTime(responseData.canScrapeAfter);
-            // 如果有上次的数据，刷新显示
-            if (responseData.lastScrapeData) {
-              await mutate();
-            }
-            setScrapeError(`${responseData.message}. Using cached data.`);
-          } else {
-            throw new Error(responseData.message || 'Failed to auto-scrape jobs');
-          }
-        } else {
-          // 成功爬取，刷新数据
-          await mutate();
-          setNextScrapeTime(null);
-        }
-        
-        setAutoScrapeDone(true);
-      } catch (error) {
-        console.error('Error auto-scraping jobs:', error);
-        setScrapeError(error instanceof Error ? error.message : 'Unknown error occurred');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    // 如果没有数据或数据为空，则执行自动爬取
-    if (!data || !data.jobListings || data.jobListings.length === 0) {
-      autoScrape();
-    } else {
-      setAutoScrapeDone(true);
-    }
-  }, [data, mutate, autoScrapeDone]);
   
   // 手动触发爬虫任务
   const handleScrape = async () => {
@@ -138,9 +82,26 @@ export default function Home() {
         <title>Job Aggregator</title>
       </Head>
       <section className="flex flex-col gap-6">
-        <Text variant="h1">AI Job Crawler</Text>
+        <Text variant="h1">Job Information Aggregator</Text>
         <Text>
-          This application aggregates job listings from big tech companies like Google, Amazon, and Aliyun.
+          This application aggregates job listings from major tech companies like Google, Amazon, and Aliyun.
+          The data is scraped using{' '}
+          <Link
+            href="https://docs.firecrawl.dev/v0/sdks/node"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            Firecrawl Node SDK
+          </Link>{' '}
+          and stored using{' '}
+          <Link
+            href="https://vercel.com/kv"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            Vercel KV
+          </Link>
+          .
         </Text>
         
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
