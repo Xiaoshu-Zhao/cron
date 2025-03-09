@@ -11,12 +11,18 @@ export default async function handler(
   
   if (!cron) return res.status(400).json({ error: 'No cron provided' })
   
-  // Only run the job scraper for the daily cron job
-  if (cron === '1d') {
+  // Only run the job scraper for the monthly cron job
+  if (cron === '1mo') {
     const response = await scrapeAllJobs()
     
     // Store the scraping result in KV
     await kv.set(cron, {
+      fetchedAt: Date.now(),
+      ...response
+    })
+    
+    // Also store the data under the '1d' key for backward compatibility with the frontend
+    await kv.set('1d', {
       fetchedAt: Date.now(),
       ...response
     })

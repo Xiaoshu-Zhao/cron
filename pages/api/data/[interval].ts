@@ -32,8 +32,8 @@ export default async function handler(
     // 获取cron任务数据
     const cronData = await kv.get<CronData>(interval) || { fetchedAt: null }
     
-    // 如果是1d间隔，返回job列表和统计数据
-    if (interval === '1d') {
+    // 如果是1d或1mo间隔，返回job列表和统计数据
+    if (interval === '1d' || interval === '1mo') {
       // 设置超时，避免长时间运行
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Query timeout')), 5000)
